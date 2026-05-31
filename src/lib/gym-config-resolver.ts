@@ -20,13 +20,12 @@ import { normalizeBusinessInfo } from "@/lib/business-info";
 import { mergeBrandingImages, mergeGallerySectionProps } from "@/lib/gallery-media";
 import { mergeSeo, mergeTypography } from "@/lib/brand-settings";
 import { getDemoContentOverride, setDemoContentOverride } from "@/lib/demo-content-store";
+import { mergeContactPageSettings, normalizeContactPageSettings } from "@/lib/contact-page";
 import {
   getFileDefaultContactPageSettings,
   getFileDefaultPricingPageSettings,
   getFileDefaultPricingPlans,
-  mergeContactPageSettings,
   mergePricingPageSettings,
-  normalizeContactPageSettings,
 } from "@/lib/marketing-pages";
 import { mapPricingPlanRow, sortPricingPlans } from "@/lib/pricing-plans";
 import type { GymPricingPlanRow } from "@/types/database";
