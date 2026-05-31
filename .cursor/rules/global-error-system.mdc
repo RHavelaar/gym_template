@@ -1,0 +1,87 @@
+---
+description: Use the global AppError + toast system for operational failures — not ad-hoc banners or generic catch blocks
+globs: "src/**/*.{ts,tsx}"
+alwaysApply: false
+---
+
+# Global error handling (required)
+
+All **new** pages, components, and server actions must use the shared error system in `src/lib/errors/`.
+Do not add inline red/green save banners, `alert()`, or a second toast library.
+
+## Hybrid UX (default)
+
+- **Field / Zod validation** — inline next to inputs (`fieldErrors`; `useActionState` banner when message
+  includes `"Please check"`)
+- **Operational failure** (save, upload, auth, DB) — `GymErrorToast` via `useErrorToast()` / `useAppAction()`
+- **Operational success** — success toast (admin/CMS) or existing inline success (e.g. profile deltas)
+
+## Server actions
+
+- Return `ActionResult<T>` from `@/lib/errors` — not bare `{ ok: true }`, not uncaught `throw new Error(...)`.
+- Wrap with `wrapAction(fn, { fallbackCode, capture: { source: "server_action", route } })`.
+- Use `ERROR_CODES.*`, `throwAppError()`, or `actionFail()` — never invent string-only errors.
+- Log server-side via `capture` in `wrapAction` (do not duplicate client + server logging for the same failure).
+
+```ts
+// ✅ GOOD
+export const saveThingAction = async (input: unknown): Promise<ActionResult> =>
+  wrapAction(
+    async () => {
+      /* ... */
+    },
+    { fallbackCode: ERROR_CODES.CMS_SAVE_FAILED, capture: cmsCapture("/admin/settings/foo") },
+  );
+
+// ❌ BAD
+export const saveThingAction = async (input: unknown) => {
+  try {
+    /* ... */ return { ok: true };
+  } catch {
+    throw new Error("Could not save.");
+  }
+};
+```
+
+Forms with inline validation + optional `error` payload: use `SaveActionResult` from `@/lib/validation/action-result`.
+
+## Client components
+
+- **Server action buttons/forms:** `useAppAction().runAction(() => myAction(data), { successMessage: "..." })`.
+- **SaveActionResult flows:** `handleSaveActionResult(result, { showError, showSuccess }, { onFieldErrors })`.
+- **`useActionState` profile/PR forms:** `useOperationalFormToast(state, { errorCode, validationIncludes:
+"Please check" })`. Keep inline banner only for validation/success where already used.
+- **Never** swallow errors: `catch { setMessage("Could not save. Owner access required.") }`.
+
+```tsx
+// ✅ GOOD
+const { runAction, pending } = useAppAction();
+await runAction(() => updateBrandAction(data), { successMessage: "Brand settings saved." });
+
+// ❌ BAD
+try {
+  await updateBrandAction(data);
+  setMessage("Saved.");
+} catch {
+  setMessage("Could not save.");
+}
+```
+
+## New routes
+
+- Add `error.tsx` in route groups that need a safety net; delegate to `RouteErrorHandler`.
+- Root fatals: `src/app/global-error.tsx` (no toast context — static fallback + `reportBoundaryErrorAction`).
+
+## Error codes & help
+
+- Pick an existing `ERROR_CODES` value or add one in `src/lib/errors/codes.ts` + `messages.ts`.
+- User-facing toasts get personality + **Get help** mailto via `AppProviders` (`business.helpEmail`).
+- Owner error history: `app_error_events` — do not create parallel error-log tables.
+
+## Key imports
+
+- `@/lib/errors` — types, `wrapAction`, `ERROR_CODES`
+- `@/lib/errors/show-error-toast` — `useErrorToast()`
+- `@/hooks/use-app-action` — `useAppAction()`
+- `@/hooks/use-operational-form-toast` — form + validation hybrid
+- `@/lib/errors/handle-action-result` — `SaveActionResult` helper

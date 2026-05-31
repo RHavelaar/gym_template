@@ -1,0 +1,54 @@
+---
+description: All user-facing content and branding must flow from config/props, not hardcoded UI
+globs: "src/**/*.{ts,tsx}"
+alwaysApply: false
+---
+
+# Config-driven content (required)
+
+**Default rule:** If copy, branding, nav, colors, feature toggles, or homepage content can reasonably live in
+config — it must. Code changes should not be required to rebrand or rewrite marketing text.
+
+## Where content lives
+
+| Kind                                        | Location                                                            |
+| ------------------------------------------- | ------------------------------------------------------------------- |
+| Per-gym brand, theme, nav, labels, features | `src/config/gyms/<slug>.ts`                                         |
+| Shared defaults                             | `src/config/base.ts`                                                |
+| Resolver / merge                            | `src/config/index.ts` — `getGymConfig()`, `mergeHomepageSections()` |
+| Admin live overrides                        | Supabase `gym_page_sections` (overlays file defaults)               |
+| Types                                       | `src/config/types.ts`                                               |
+
+## Do
+
+- Read config via `getGymConfig()` (or slug argument) in Server Components
+- Pass `GymConfig` (or slices) into presentational components as props
+- Add new gyms by **new config file + registry entry**, not forked components
+- Use `labels.*` for button/link text (`prSubmit`, `leaderboard`, …)
+- Use `features.*` to gate modules (`socialFeed`, `competitions`, …)
+- Use `homepageSections[]` with typed `type` + `props` for public homepage blocks
+- Keep Iron Asylum / gym-specific strings **only** in config/seed SQL
+
+## Do not
+
+- Hardcode gym names, taglines, phone, address, or hours in `src/components/` or `src/app/`
+- Duplicate theme hex values in components — use `themeToCssVars(config)` / CSS variables
+- Add one-off marketing strings in JSX when they belong in section `props` or `labels`
+
+## Adding new UI surface area
+
+1. Extend types in `src/config/types.ts` if needed
+2. Add defaults to `base.ts` or gym config
+3. Build a **reusable** component that accepts props/config
+4. Wire admin editor to persist overrides when staff should edit without deploy
+
+## Example
+
+```tsx
+// ✅ GOOD
+const config = getGymConfig();
+<h1>{config.labels.leaderboard}</h1>
+
+// ❌ BAD
+<h1>Leaderboards</h1>
+```

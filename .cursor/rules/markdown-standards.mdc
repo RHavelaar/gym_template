@@ -1,0 +1,63 @@
+---
+description: Strict markdown so editors stay clean (markdownlint MD040, MD060, MD013, MD041)
+globs: "**/*.md"
+alwaysApply: false
+---
+
+# Markdown standards
+
+This repo uses **markdownlint** (see `.markdownlint.json`). Follow these rules on every edit so Problem badges stay at zero.
+
+## Required on every markdown file
+
+### First line is a level-1 heading (MD041)
+
+The first line must be `# Title`.
+
+### Fenced code blocks need a language (MD040)
+
+Use `bash`, `text`, `typescript`, `sql`, etc. Never bare ` ``` ` alone.
+
+### Tables use aligned style (MD060)
+
+Example:
+
+| Column one | Column two    |
+| ---------- | ------------- |
+| Value      | Another value |
+
+Not compact `|a|b|` or `|----------|` without spaces.
+
+### Line length ≤ 120 characters (MD013)
+
+Wrap prose; break long URLs onto their own line if needed.
+
+## Long content exceptions
+
+For files where wrapping ruins readability (e.g. long audit metadata examples in
+`docs/audit-logs.md`), add at the top after the H1:
+
+```markdown
+<!-- markdownlint-disable MD013 -->
+```
+
+Do not disable other rules unless documented in this file.
+
+## After editing markdown
+
+Run:
+
+```bash
+npm run lint:md
+```
+
+Fix all reported errors before considering the task done.
+
+Build artifacts (`.next/`) and `node_modules/` are excluded via `.markdownlint-cli2.jsonc` and
+`.vscode/settings.json` — do not lint those paths.
+
+## Links and lists
+
+- Use full URLs in links — no shortened paths
+- One blank line before and after headings and fenced blocks
+- No HTML entities in place of real characters (`&amp;` → `&`)

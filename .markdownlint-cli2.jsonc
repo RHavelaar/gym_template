@@ -1,0 +1,3 @@
+{
+  "globs": ["**/*.{md,mdc}", "!node_modules/**", "!.next/**"]
+}

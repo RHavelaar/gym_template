@@ -1,0 +1,123 @@
+@import "tailwindcss";
+
+:root {
+  --gym-primary: #dc2626;
+  --gym-primary-fg: #ffffff;
+  --gym-accent: #f59e0b;
+  --gym-accent-fg: #0a0a0a;
+  --gym-bg: #0a0a0a;
+  --gym-surface: #141414;
+  --gym-border: #262626;
+  --gym-muted: #a3a3a3;
+  --gym-danger: #ef4444;
+  --gym-font-heading: "Inter", system-ui, sans-serif;
+  --gym-font-body: "Inter", system-ui, sans-serif;
+  --gym-font-mono: "Roboto Mono", ui-monospace, monospace;
+  --gym-font-fallback: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  --gym-text-xs: 0.75rem;
+  --gym-text-sm: 0.875rem;
+  --gym-text-base: 1rem;
+  --gym-text-lg: 1.125rem;
+  --gym-text-xl: 1.25rem;
+  --gym-text-2xl: 1.5rem;
+  --gym-text-3xl: 1.875rem;
+  --gym-text-4xl: 2.25rem;
+}
+
+@theme inline {
+  --font-sans: var(--gym-font-body, var(--font-geist-sans));
+  --font-mono: var(--gym-font-mono, var(--font-geist-mono));
+}
+
+body {
+  background: var(--gym-bg);
+  color: #fafafa;
+  font-family: var(--gym-font-body), var(--gym-font-fallback);
+  font-size: var(--gym-text-base);
+}
+
+/* Touch-style scrolling without visible scrollbars (admin device previews) */
+.scrollbar-none {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.scrollbar-none::-webkit-scrollbar {
+  display: none;
+}
+
+@keyframes ken-burns {
+  from {
+    transform: scale(1);
+  }
+  to {
+    transform: scale(1.08);
+  }
+}
+
+.animate-ken-burns {
+  animation: ken-burns 8s ease-out forwards;
+}
+
+@keyframes gallery-hint-glow {
+  0%,
+  100% {
+    box-shadow:
+      0 12px 32px rgb(0 0 0 / 0.55),
+      0 0 0 0 rgb(245 158 11 / 0%);
+  }
+  50% {
+    box-shadow:
+      0 12px 32px rgb(0 0 0 / 0.55),
+      0 0 0 2px rgb(245 158 11 / 0.45);
+  }
+}
+
+@keyframes gallery-hint-bob {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(4px);
+  }
+}
+
+/* Sonner gym toast theme */
+.gym-toast,
+.gym-toast-error,
+.gym-toast-success {
+  display: flex;
+  width: min(24rem, calc(100vw - 2rem));
+  border-radius: 0.75rem;
+  border: 1px solid var(--gym-border);
+  background: linear-gradient(135deg, var(--gym-surface) 0%, #0f0f0f 100%);
+  padding: 1rem;
+  box-shadow:
+    0 16px 40px rgb(0 0 0 / 0.55),
+    inset 0 1px 0 rgb(255 255 255 / 0.04);
+}
+
+.gym-toast-error {
+  border-left: 4px solid var(--gym-danger);
+}
+
+.gym-toast-success {
+  border-left: 4px solid var(--gym-accent);
+}
+
+.gym-toast-success-inner {
+  color: white;
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+.gym-toast-close {
+  color: var(--gym-muted) !important;
+  background: transparent !important;
+  border: none !important;
+}
+
+.gym-toast-close:hover {
+  color: white !important;
+}

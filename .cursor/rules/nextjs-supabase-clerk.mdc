@@ -1,0 +1,52 @@
+---
+description: Next.js routes, proxy, Clerk auth, and Supabase data access patterns
+globs: "src/**/*.{ts,tsx}"
+alwaysApply: false
+---
+
+# Next.js + Clerk + Supabase
+
+## Routing
+
+- Route groups: `(public)`, `(member)`, `(admin)` — shared `GymShell` layout
+- Auth pages: `sign-in/[[...sign-in]]`, `sign-up/[[...sign-up]]`
+- Protected routes enforced in `src/proxy.ts` (Clerk) + `requireMember` / `requireStaff` in server code
+
+## Proxy (`src/proxy.ts`)
+
+- Combines Clerk `clerkMiddleware` + Supabase `updateSession` from `@/lib/supabase/session`
+- Do not recreate `middleware.ts` — it is deprecated in Next.js 16
+
+## Supabase clients
+
+- Browser: `@/lib/supabase/client`
+- Server Components / Actions: `@/lib/supabase/server`
+- Key env: `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` (not legacy anon unless fallback)
+- Service role: **optional**, server-only, never `NEXT_PUBLIC_*`
+
+## Auth split
+
+- **Clerk** — who is signed in; session token passed to Supabase via `@/lib/supabase/clerk-server`
+- **Supabase third-party auth** — Clerk domain registered in Supabase Dashboard (not JWT templates)
+- **Supabase + RLS** — what data they can read/write (primary enforcement)
+- Map Clerk user → `profiles` → `gym_memberships.role` for RBAC helpers in app code
+
+## Migrations & CLI
+
+- Create: `supabase migration new <name>` → edit SQL in `supabase/migrations/`
+- Apply local: `supabase db reset` · Apply remote: `supabase db push`
+- Run these yourself — do not defer to the user. Full checklist: `.cursor/rules/supabase-cli-rls.mdc`
+
+## Data writes
+
+- Prefer Server Actions with Zod validation
+- Demo mode uses `src/lib/demo-data.ts` until Supabase queries replace it
+- New tables: migration + **RLS enabled** + policies for select/insert/update/delete as needed
+
+## UI
+
+- Responsive strategy by route group — see `.cursor/rules/responsive-design.mdc`
+- Public, member, staff, and trainer surfaces: mobile-first, large tap targets, minimal clutter
+- Owner settings / CMS: desktop-first, reasonably usable on mobile
+- Reuse `Button`, `Card`, `Input` from `src/components/ui/`
+- Domain components: `leaderboards/`, `pr/`, `competitions/`, `admin/`, `social/`

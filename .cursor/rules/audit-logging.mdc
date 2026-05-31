@@ -1,0 +1,74 @@
+---
+description: Require audit log entries for every meaningful DB/storage mutation (user + admin streams)
+globs: "src/**/*.{ts,tsx}"
+alwaysApply: true
+---
+
+# Audit logging (required)
+
+Every **meaningful write** to Supabase or gym storage must emit an audit event **after the mutation succeeds**.
+Owners review logs at `/admin/settings/audit` (user activity vs staff/site activity).
+
+Do **not** log passive UI (navigation, opening modals, failed validation-only submits). **Do** log saves,
+uploads, deletes, posts, moderation, membership/role changes, and webhook-driven profile sync.
+
+## API (use only these — never insert audit rows from the client)
+
+```ts
+import { buildChangeSet, logAdminAuditEvent, logUserAuditEvent } from "@/lib/audit";
+import { resolveAuditActor } from "@/lib/audit/resolve-actor";
+import { systemActor } from "@/lib/audit";
+import { ADMIN_AUDIT_ACTIONS, USER_AUDIT_ACTIONS } from "@/types/database";
+```
+
+- **Member self-service** → `logUserAuditEvent` (profile, goals, privacy, posts, PR submit, reactions).
+- **Staff / owner / system** → `logAdminAuditEvent` (CMS, storage, trainer ops, equipment, competitions,
+  PR moderation, Clerk webhooks).
+- **Actor:** `await resolveAuditActor(auth)` from RBAC helpers; webhooks/cron use `systemActor()`.
+- **Action:** Add to `USER_AUDIT_ACTIONS` or `ADMIN_AUDIT_ACTIONS` in `src/types/database.ts`
+  (`domain.verb.noun`); reuse existing ids when applicable.
+- **Summary:** One short human-readable line for the audit table.
+- **Metadata:** Prefer `buildChangeSet(before, after, allowedKeys)`; use ids/counts for large payloads,
+  not full JSON blobs.
+- **Failure policy:** Audit insert must not block the mutation (helpers already swallow errors).
+
+## Where to wire logging
+
+- `src/app/actions/*.ts` — any action that `.insert` / `.update` / `.upsert` / `.delete` or storage
+  upload/move/remove.
+- `src/lib/*.ts` — shared writers (e.g. `upsertProfileFromClerk`).
+- `src/app/api/**/route.ts` — webhooks and handlers that mutate data.
+
+Log **once per successful user intent** after DB/storage confirms — not on every row in a bulk loop
+unless each row is a distinct auditable action.
+
+## Checklist before finishing a mutation feature
+
+1. Chose **user** vs **admin** stream (owner CMS → admin; member profile → user).
+2. Added or reused an action constant in `src/types/database.ts`.
+3. Passed `gymId`, `actor`, `action`, `resourceType`, `summary`; `resourceId` when known.
+4. Demo mode (`!hasSupabase`) still logs via the same helpers.
+5. No client-side audit inserts or browser RLS bypass.
+
+## Examples
+
+```ts
+// ✅ GOOD — after successful save
+const actor = await resolveAuditActor(ctx);
+await logUserAuditEvent({
+  gymId,
+  actor,
+  action: USER_AUDIT_ACTIONS.PROFILE_PRIVACY_UPDATE,
+  resourceType: "profiles",
+  resourceId: ctx.profileId,
+  summary: `Changed profile visibility to ${visibility}`,
+  metadata: {
+    changes: buildChangeSet({ visibility: before }, { visibility }, ["visibility"]),
+  },
+});
+
+// ❌ BAD — mutation with no audit
+await supabase.from("posts").insert({ ... });
+```
+
+Reference: `src/app/actions/content.ts`, `profile.ts`; schema in `supabase/migrations/*_audit_logs.sql`.

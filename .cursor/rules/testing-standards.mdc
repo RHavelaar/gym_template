@@ -1,0 +1,76 @@
+---
+description: Vitest requirements when creating or changing app logic, actions, validation, and UI behavior
+alwaysApply: true
+---
+
+# Testing standards (Vitest)
+
+## Tooling
+
+- **Runner**: Vitest (`vitest.config.ts`, `@/` alias)
+- **Commands**: `npm run test` (CI-style run) · `npm run build` runs tests first via `prebuild`
+- **Colocation**: `*.test.ts` next to the module under test (see existing files in `src/lib/`, `src/app/actions/`)
+
+## When tests are required
+
+Any task that **creates or changes** behavior in these areas must include or update tests before finishing:
+
+- **Zod schemas / validation** — accept + reject cases, conditional rules → `src/lib/validation/*.test.ts`
+- **Pure helpers & transforms** — inputs, edge cases, migrations → `src/lib/*.test.ts`
+- **Server Actions** — success, validation errors, auth (mocked) → `src/app/actions/*.test.ts`
+- **Save/result helpers** — `SaveActionResult`, toast handlers → `src/lib/errors/*.test.ts`
+- **Form payload builders** — trimming, filtering, shape → colocated `*.test.ts`
+
+**UI components (`*.tsx`)**: Prefer testing **extracted logic** (validation, mappers, result handlers) in
+`.test.ts`. Do not skip tests because logic lives in a client component — move testable branches to
+`src/lib/` or colocated helpers, then test those.
+
+## What to cover (minimum bar)
+
+For each changed feature, include tests for:
+
+1. **Happy path** — valid input succeeds
+2. **Validation** — invalid input returns structured errors (not silent failure)
+3. **Authorization** — owner/auth failures propagate or map correctly (actions)
+4. **Regression** — bugs fixed in the session get a test that would have caught them
+
+Skip tests only for purely presentational changes (copy, spacing, class names) with no logic change.
+
+## Patterns (match existing code)
+
+**Schema tests** — use `safeParse`, assert `success` and message/path:
+
+```typescript
+const result = heroPropsSchema.safeParse({ ...valid, headline: "" });
+expect(result.success).toBe(false);
+```
+
+**Shared fixtures** — put reusable valid payloads in `*.fixtures.ts` beside tests (see
+`src/lib/validation/media.fixtures.ts`).
+
+**Server Action tests** — `vi.mock` dependencies before dynamic import; use demo mode
+(`hasSupabase: false`) for persistence without network:
+
+```typescript
+vi.mock("@/lib/env", () => ({ hasSupabase: false, hasClerk: false }));
+const { updateMediaAction } = await import("@/app/actions/content");
+```
+
+**Action results** — assert `{ ok: true }`, `{ ok: false, message, fieldErrors? }`; validation must not
+throw opaque strings.
+
+## Anti-patterns
+
+- Do not add tests that only assert constants or framework behavior
+- Do not use external URLs in upload tests — assets must go through storage/library flows
+- Do not mock away the behavior under test; mock IO, auth, and Supabase only
+- Do not leave failing or skipped tests in the tree
+
+## Before finishing any task with logic changes
+
+1. Add or update `*.test.ts` for touched behavior
+2. `npm run test` — all tests must pass
+3. `npm run lint` and `npm run build` (build re-runs tests via `prebuild`)
+
+If a gap cannot be tested without heavy E2E setup, note it in the PR/summary and still test every pure/action
+layer reachable with Vitest.

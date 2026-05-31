@@ -1,0 +1,71 @@
+---
+description: Supabase CLI usage and RLS-first database security
+alwaysApply: true
+---
+
+# Supabase CLI + RLS
+
+## CLI is available — run it yourself
+
+This environment has the **Supabase CLI** installed. Do not ask the user to run Supabase commands unless auth
+or network blocks you.
+
+Discover flags with `--help` before guessing:
+
+```bash
+supabase --help
+supabase db --help
+supabase migration new --help
+```
+
+### Default workflow
+
+1. **New schema change** → create a migration SQL file in `supabase/migrations/` then edit it
+2. **Apply locally** → `supabase db reset` (or `supabase migration up` if stack is already running)
+3. **Apply to linked remote** → `supabase db push --yes` (non-interactive)
+4. **Verify** → re-run the app flow or query affected tables; use MCP `get_advisors` for security lint
+
+Also use when relevant: `supabase start`, `supabase status`, `supabase link`, `supabase db diff`.
+
+### Migration files (important in Cursor agent shell)
+
+**Do not run `supabase migration new`** from the agent terminal — it hangs waiting for a TTY/editor and never
+exits, which looks like a freeze.
+
+Create files manually instead:
+
+```bash
+# UTC timestamp + snake_case name (Supabase convention)
+touch "supabase/migrations/$(date -u +%Y%m%d%H%M%S)_your_change.sql"
+```
+
+Then edit the SQL and run `supabase db push --yes`.
+
+`supabase db push`, `supabase db query --linked`, and `supabase migration list` work reliably — prefer those.
+
+## RLS everywhere (non-negotiable)
+
+Supabase exposes `public` through the Data API. **Every new table in an exposed schema must have RLS enabled**
+before the task is done.
+
+```sql
+alter table my_table enable row level security;
+create policy "..." on my_table for select using (...);
+```
+
+### Policy rules for this project
+
+- **Clerk is auth; Supabase + RLS is authorization.** Map Clerk `sub` → `profiles.clerk_user_id` → membership/role checks.
+- **Prefer RLS over app-only checks.** Server Actions and RBAC helpers are a second layer, not a substitute.
+- **Use `app_private` for security definer helpers** — never put those functions in `public`.
+- **Every operation needs a matching policy** — SELECT for reads; INSERT/UPDATE/DELETE explicitly; remember
+  UPDATE requires SELECT access to the row.
+- **No service role in the browser.** `createServiceClient()` is server-only webhooks/admin bootstrap — never `NEXT_PUBLIC_*`.
+- **Views in exposed schemas** → `security_invoker = true` (Postgres 15+) or restrict grants.
+
+### Before finishing Supabase work
+
+1. Confirm RLS is enabled on all new/changed tables
+2. Policies match the product privacy model (e.g. profile visibility, trainer assignments)
+3. Run `supabase db push` or `supabase db reset` so migrations are applied
+4. Check advisors for missing RLS or permissive policies when MCP is available

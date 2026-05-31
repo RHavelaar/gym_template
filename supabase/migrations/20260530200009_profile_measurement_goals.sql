@@ -1,0 +1,1 @@
+-- No-op: profile_measurement_goals table and RLS were created in 20260530200000_profile_measurement_goals.sql

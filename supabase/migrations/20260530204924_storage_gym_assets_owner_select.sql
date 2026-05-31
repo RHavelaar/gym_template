@@ -1,0 +1,1 @@
+-- Applied via 20260530230000_storage_gym_assets_owner_select.sql (no-op placeholder)

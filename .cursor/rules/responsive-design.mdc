@@ -1,0 +1,44 @@
+---
+description: Responsive layout strategy by audience — mobile-first for members/staff, desktop-first for owner CMS
+alwaysApply: true
+---
+
+# Responsive design by audience
+
+Tailwind uses mobile-first **breakpoints** (`sm:`, `md:`, `lg:`). Product layout strategy is **not**
+one-size-fits-all — match the primary device for each audience.
+
+## Strategy map
+
+- **Public site** `(public)/**` — phone, **mobile-first** (design and test at ~375px first)
+- **Member app** `(member)/**` — phone, **mobile-first**
+- **Staff ops** `(admin)/admin/**` except owner settings — phone/tablet on floor, **mobile-first**
+- **Trainer flows** `(member)/trainer/**` — phone, **mobile-first**
+- **Owner CMS** `(admin)/admin/settings/**`, `src/components/admin/settings/**` — desktop,
+  **desktop-first** (usable on mobile, not optimized for it)
+
+When unsure, use route group + role: day-to-day gym use → mobile-first; site builder / brand / config →
+desktop-first.
+
+## Mobile-first surfaces (required)
+
+- Layout and typography readable at 320–375px without horizontal scroll
+- Tap targets ≥ 44px; primary actions easy to reach (avoid hover-only critical paths)
+- Stack columns by default; add columns at `sm:` / `md:` only when space allows
+- Forms: full-width inputs, clear labels, sticky or obvious submit on long flows (e.g. PR submit)
+- Test member/staff flows as if used one-handed on the gym floor
+
+## Desktop-first owner CMS (required)
+
+- Two-column editor + preview is the default — use `SettingsEditorShell`, `PreviewDeviceFrame`
+- Dense tables, side nav, and wide `max-w-7xl` layouts are OK on desktop
+- On mobile: stack editor above preview, no clipped overflow, scrollable panels, save still reachable
+- Preview-first on small screens with jump-to-edit is fine (`lg:hidden` edit buttons) — match existing
+  settings patterns
+- Do not sacrifice desktop productivity to force mobile parity on configuration screens
+
+## Shared
+
+- Dark gym aesthetic via theme CSS vars — see `project-foundation.mdc`
+- Reuse `Button`, `Card`, `Input` from `src/components/ui/`
+- Owner-facing copy and field help — see `owner-friendly-ui.mdc`

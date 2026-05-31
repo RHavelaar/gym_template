@@ -1,0 +1,12 @@
+version: 3
+# Copy to ngrok.yml and replace the url with your dev domain from:
+# https://dashboard.ngrok.com/domains
+#
+# One-time auth (stores token in your user ngrok config, not in git):
+#   ngrok config add-authtoken <token>
+# Token: https://dashboard.ngrok.com/get-started/your-authtoken
+endpoints:
+  - name: gym-template
+    url: YOUR-DEV-DOMAIN.ngrok-free.dev
+    upstream:
+      url: http://127.0.0.1:3000

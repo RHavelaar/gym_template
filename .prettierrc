@@ -1,0 +1,14 @@
+{
+  "semi": true,
+  "singleQuote": false,
+  "printWidth": 120,
+  "plugins": ["prettier-plugin-tailwindcss"],
+  "overrides": [
+    {
+      "files": "*.mdc",
+      "options": {
+        "parser": "markdown"
+      }
+    }
+  ]
+}

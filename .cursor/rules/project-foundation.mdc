@@ -1,0 +1,54 @@
+---
+description: Core standards for the headless gym platform — stack, scope, and consistency
+alwaysApply: true
+---
+
+# Gym platform — project foundation
+
+## What this is
+
+Multi-tenant, **config-driven** gym engagement platform (Next.js 16, Clerk, Supabase, Vercel). Iron Asylum is
+seed content only — live in `src/config/gyms/`, not in UI components.
+
+## Stack (do not swap casually)
+
+- **Next.js 16** App Router — use `src/proxy.ts` (not `middleware.ts`)
+- **Clerk** — auth; roles from `gym_memberships` / RBAC helpers
+- **Supabase** — data; `NEXT_PUBLIC_SUPABASE_URL` + `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` only for clients
+- **Supabase CLI** — available in this environment; agents run migrations via CLI (see `.cursor/rules/supabase-cli-rls.mdc`)
+- **Tailwind** — responsive breakpoints + dark hardcore gym aesthetic via CSS vars from config theme
+  (audience strategy: `.cursor/rules/responsive-design.mdc`; class syntax: `.cursor/rules/tailwind-v4-classes.mdc`)
+
+Read `node_modules/next/dist/docs/` before assuming older Next.js APIs.
+
+## Before finishing any task
+
+1. `npm run test` — Vitest must pass; add/update tests for touched logic
+   (see `.cursor/rules/testing-standards.mdc`); includes repo-wide Tailwind class syntax checks
+   (see `.cursor/rules/tailwind-v4-classes.mdc`; fast path: `npm run lint:tailwind`)
+2. `npm run lint` — ESLint must pass
+3. `npm run lint:md` — if any `*.{md,mdc}` changed
+4. `npm run build` — for non-trivial TS/route changes (runs tests via `prebuild`)
+
+Fix real issues in source; do not suppress linters to hide problems in `src/`. Excluding `.next/` and
+`node_modules/` is standard — those paths are generated, not edited.
+
+## Code quality
+
+- **Minimal diffs** — only change what the task needs
+- **Match existing patterns** — naming, folders, Server Actions, `cn()` utility
+- **No secrets in git** — keys only in `.env.local` (gitignored)
+- **Hooks** — never call React hooks after conditional returns; split components instead
+- **Server vs client** — `"use client"` only when needed (interactivity, Clerk hooks)
+
+## File layout
+
+- `src/config/` — gym branding, nav, labels, features, homepage sections
+- `src/components/` — reusable UI by domain (`leaderboards`, `pr`, `admin`, …)
+- `src/lib/` — auth, Supabase, RBAC, validation
+- `src/app/api/` — HTTP Route Handlers (webhooks, external REST); see `api-routes.mdc`
+- `openapi/` — OpenAPI spec for HTTP routes (source of truth)
+- `postman/` — Postman collection + environments (keep in sync with `openapi/`)
+- `docs/api/` — human-readable API docs (HTTP + Server Actions catalog)
+- `supabase/migrations/` — schema + RLS; never skip RLS on public tables (see `supabase-cli-rls.mdc`)
+- `src/lib/audit/` — append-only audit logs for all DB/storage mutations (see `audit-logging.mdc`)

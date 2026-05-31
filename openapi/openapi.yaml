@@ -1,0 +1,213 @@
+openapi: 3.1.0
+info:
+  title: Gym Platform API
+  version: 0.1.0
+  description: |
+    HTTP Route Handlers for the gym engagement platform.
+
+    Server Actions in `src/app/actions/` are internal UI mutations — not listed here.
+    See `docs/api/server-actions.md`.
+
+    Multi-tenancy: one gym per deployment via `NEXT_PUBLIC_GYM_SLUG`.
+    See `docs/api/multi-tenancy.md`.
+  contact:
+    name: Gym Platform
+servers:
+  - url: http://localhost:3000
+    description: Local development
+  - url: https://{ngrokDomain}
+    description: Local dev via ngrok static domain
+    variables:
+      ngrokDomain:
+        default: your-id.ngrok-free.dev
+  - url: https://{productionDomain}
+    description: Production
+    variables:
+      productionDomain:
+        default: example.com
+
+tags:
+  - name: Webhooks
+    description: Inbound webhooks from third-party services
+  - name: v1
+    description: Future external REST API (placeholder)
+
+paths:
+  /api/webhooks/clerk:
+    post:
+      operationId: clerkWebhook
+      tags:
+        - Webhooks
+      summary: Clerk user lifecycle webhook
+      description: |
+        Receives Clerk webhook events for profile sync into Supabase.
+
+        **Handled events:** `user.created`, `user.updated`, `user.deleted`
+
+        **Side effects:**
+        - Upsert or delete `profiles` row
+        - Create `gym_memberships` with role `user` on first sign-up
+        - Admin audit log via system actor
+
+        **Tenant scope:** Membership is created for the gym resolved from
+        `NEXT_PUBLIC_GYM_SLUG` → `getGymIdBySlug`.
+
+        Human-readable docs: `docs/api/http/clerk-webhook.md`
+      security:
+        - clerkWebhookSignature: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ClerkWebhookEvent"
+            examples:
+              userCreated:
+                summary: user.created
+                value:
+                  type: user.created
+                  object: event
+                  data:
+                    id: user_2abc123
+                    first_name: Jane
+                    last_name: Doe
+                    username: janedoe
+                    image_url: https://img.clerk.com/example.png
+      responses:
+        "200":
+          description: Event processed successfully
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: "#/components/schemas/WebhookSuccessResponse"
+                  - $ref: "#/components/schemas/WebhookSkippedResponse"
+              examples:
+                success:
+                  value:
+                    ok: true
+                skipped:
+                  summary: Demo mode (Supabase not configured)
+                  value:
+                    ok: true
+                    skipped: true
+        "400":
+          description: Webhook signature verification failed
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                error: Verification failed
+        "500":
+          description: Handler error while processing event
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                error: Handler failed
+
+components:
+  securitySchemes:
+    clerkWebhookSignature:
+      type: apiKey
+      in: header
+      name: svix-signature
+      description: |
+        Clerk webhooks are signed via Svix. The handler calls `verifyWebhook(req)` which
+        validates headers using `CLERK_WEBHOOK_SIGNING_SECRET` (whsec_...).
+
+        Postman cannot easily forge valid signatures — use Clerk Dashboard "Send test event"
+        or sign requests with the signing secret per Svix docs.
+    clerkSession:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: |
+        Placeholder for future `/api/v1/*` routes authenticated via Clerk session token.
+    gymApiKey:
+      type: apiKey
+      in: header
+      name: X-Gym-Api-Key
+      description: |
+        Placeholder for future partner integrations scoped to a single gym_id.
+
+  schemas:
+    ErrorResponse:
+      type: object
+      required:
+        - error
+      properties:
+        error:
+          type: string
+          description: Human-readable error message
+        code:
+          type: string
+          description: Optional machine-readable error code (future `/api/v1/*`)
+        detail:
+          type: string
+          description: Optional diagnostic detail (omit in production responses)
+
+    WebhookSuccessResponse:
+      type: object
+      required:
+        - ok
+      properties:
+        ok:
+          type: boolean
+          enum:
+            - true
+
+    WebhookSkippedResponse:
+      type: object
+      required:
+        - ok
+        - skipped
+      properties:
+        ok:
+          type: boolean
+          enum:
+            - true
+        skipped:
+          type: boolean
+          enum:
+            - true
+          description: Returned when Supabase is not configured (demo mode)
+
+    ClerkWebhookEvent:
+      type: object
+      description: Subset of Clerk webhook event envelope (full schema varies by event type)
+      required:
+        - type
+        - data
+      properties:
+        type:
+          type: string
+          enum:
+            - user.created
+            - user.updated
+            - user.deleted
+          description: Event type handled by this endpoint
+        object:
+          type: string
+          example: event
+        data:
+          type: object
+          description: Clerk user object payload
+          properties:
+            id:
+              type: string
+              description: Clerk user ID (maps to profiles.clerk_user_id)
+            first_name:
+              type: string
+              nullable: true
+            last_name:
+              type: string
+              nullable: true
+            username:
+              type: string
+              nullable: true
+            image_url:
+              type: string
+              nullable: true

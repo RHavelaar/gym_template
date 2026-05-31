@@ -1,0 +1,28 @@
+{
+  "files.associations": {
+    "*.css": "tailwindcss"
+  },
+  "tailwindCSS.experimental.configFile": "src/app/globals.css",
+  "tailwindCSS.lint.suggestCanonicalClasses": "warning",
+  "tailwindCSS.lint.invalidApply": "error",
+  "tailwindCSS.lint.invalidConfigPath": "error",
+  "tailwindCSS.lint.invalidScreen": "error",
+  "tailwindCSS.lint.invalidTailwindDirective": "error",
+  "tailwindCSS.lint.invalidVariant": "error",
+  "tailwindCSS.lint.recommendedVariantOrder": "warning",
+  "tailwindCSS.files.exclude": [
+    "**/.git/**",
+    "**/node_modules/**",
+    "**/.next/**",
+    "**/.hg/**",
+    "**/.svn/**",
+    "**/*.test.ts"
+  ],
+  "markdownlint.ignore": ["**/node_modules/**", "**/.next/**"],
+  "files.watcherExclude": {
+    "**/.next/**": true
+  },
+  "search.exclude": {
+    "**/.next": true
+  }
+}

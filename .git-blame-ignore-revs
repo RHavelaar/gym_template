@@ -1,0 +1,4 @@
+# Bulk formatting / tooling commits — keeps git blame useful after history grows.
+# Optional local setup: git config blame.ignoreRevsFile .git-blame-ignore-revs
+#
+# History was squashed to a single initial commit; add new SHAs below as needed.

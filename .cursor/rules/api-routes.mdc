@@ -1,0 +1,64 @@
+---
+description: Standards for HTTP Route Handlers — auth, errors, multi-tenancy, docs, Postman
+globs: "src/app/api/**/*.{ts,tsx}"
+alwaysApply: false
+---
+
+# HTTP API routes (required)
+
+Use Route Handlers for **external callers**: webhooks, mobile apps, partner integrations. Prefer
+Server Actions for owner/member UI mutations (see `.cursor/rules/nextjs-supabase-clerk.mdc`).
+
+Reference: [`src/app/api/webhooks/clerk/route.ts`](../src/app/api/webhooks/clerk/route.ts)
+
+## When to add a Route Handler
+
+- Inbound webhooks (Clerk, Stripe, etc.)
+- REST endpoints for third-party or mobile clients
+- Cron or background job HTTP triggers
+
+Do **not** wrap Server Actions as HTTP unless building a deliberate external API surface.
+
+## Checklist — every new or changed route
+
+1. **Validate** input with Zod; reject early with structured JSON
+2. **Auth** — pick one and document it in OpenAPI:
+   - Webhook: signature verification (e.g. `verifyWebhook`)
+   - User: Clerk `auth()` session
+   - Partner: gym-scoped API key (future `/api/v1/*`)
+   - Never trust client-supplied `gym_id` without verification
+3. **Multi-tenancy** — resolve gym from config/token; see `docs/api/multi-tenancy.md`
+4. **Data writes** — RLS-first via Clerk Supabase client; service role only when justified
+   (webhooks/system). Audit log after successful mutation per `audit-logging.mdc`
+5. **Errors** — return `{ error: string }` minimum; align with `AppErrorPayload` for `/api/v1/*`
+6. **Tests** — colocated `route.test.ts` (Vitest): auth failure, validation, happy path (mock IO)
+7. **OpenAPI** — add/update path in `openapi/openapi.yaml`
+8. **Markdown** — add/update `docs/api/http/<name>.md`; link from `docs/api/README.md`
+9. **Postman** — add/update request in `postman/gym-platform.postman_collection.json`
+10. **Proxy** — if route must bypass Clerk session, add to public matcher in `src/proxy.ts`
+
+## Naming and versioning
+
+| Path prefix                | Use                      |
+| -------------------------- | ------------------------ |
+| `/api/webhooks/<provider>` | Inbound signed webhooks  |
+| `/api/v1/<resource>`       | Future external REST API |
+
+## Response conventions
+
+```typescript
+// Success
+return NextResponse.json({ ok: true, data?: T });
+
+// Client error (4xx)
+return NextResponse.json({ error: "..." }, { status: 400 });
+
+// Server error (5xx) — log details server-side only
+return NextResponse.json({ error: "Handler failed" }, { status: 500 });
+```
+
+## Before finishing
+
+- `npm run test` if route logic or tests changed
+- `npm run lint:md` if markdown docs changed
+- Confirm OpenAPI and Postman match the implemented handler

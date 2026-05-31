@@ -1,0 +1,140 @@
+{
+  "info": {
+    "_postman_id": "gym-platform-api-v1",
+    "name": "Gym Platform API",
+    "description": "HTTP Route Handlers for the gym engagement platform.\n\nServer Actions (internal UI mutations) are documented in docs/api/server-actions.md — they are not included here because they require Next.js action headers and a Clerk session.\n\nOpenAPI spec: openapi/openapi.yaml\n\nImport environments from postman/environments/ for baseUrl variables.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3000",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "Webhooks",
+      "description": "Inbound webhooks from third-party services. Real Clerk webhook calls require a valid Svix signature — use Clerk Dashboard \"Send test event\" for integration testing.",
+      "item": [
+        {
+          "name": "POST /api/webhooks/clerk",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"type\": \"user.created\",\n  \"object\": \"event\",\n  \"data\": {\n    \"id\": \"user_example123\",\n    \"first_name\": \"Jane\",\n    \"last_name\": \"Doe\",\n    \"username\": \"janedoe\",\n    \"image_url\": null\n  }\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/webhooks/clerk",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "webhooks", "clerk"]
+            },
+            "description": "Clerk user lifecycle webhook.\n\n**Note:** Without valid Svix signature headers, this returns 400 `{ \"error\": \"Verification failed\" }`. For real testing, use Clerk Dashboard test events against your ngrok URL.\n\nDocs: docs/api/http/clerk-webhook.md\nOpenAPI: openapi/openapi.yaml"
+          },
+          "response": [
+            {
+              "name": "200 OK — processed",
+              "originalRequest": {
+                "method": "POST",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/webhooks/clerk",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "webhooks", "clerk"]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"ok\": true\n}"
+            },
+            {
+              "name": "200 OK — demo mode skipped",
+              "originalRequest": {
+                "method": "POST",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/webhooks/clerk",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "webhooks", "clerk"]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"ok\": true,\n  \"skipped\": true\n}"
+            },
+            {
+              "name": "400 Verification failed",
+              "originalRequest": {
+                "method": "POST",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/webhooks/clerk",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "webhooks", "clerk"]
+                }
+              },
+              "status": "Bad Request",
+              "code": 400,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"error\": \"Verification failed\"\n}"
+            },
+            {
+              "name": "500 Handler failed",
+              "originalRequest": {
+                "method": "POST",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/webhooks/clerk",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "webhooks", "clerk"]
+                }
+              },
+              "status": "Internal Server Error",
+              "code": 500,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"error\": \"Handler failed\"\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Future /api/v1",
+      "description": "Placeholder for external REST APIs (partner integrations, mobile clients).\n\nWhen adding routes under /api/v1/, update this folder, openapi/openapi.yaml, and docs/api/http/ per .cursor/rules/api-routes.mdc.",
+      "item": []
+    }
+  ]
+}

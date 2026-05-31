@@ -1,0 +1,42 @@
+---
+description: Build UI for low-tech gym owners — plain language, help text, live previews
+alwaysApply: true
+---
+
+# Owner-friendly UI (required)
+
+Design for gym owners and staff who may not be technical. Every screen should explain itself
+without a support call.
+
+## Plain language
+
+- Avoid jargon (RLS, slug, token, schema) in owner-facing copy
+- Prefer "Save changes" over "Persist config"; "Homepage hero" over "hero section props"
+
+## Help on every control
+
+- Every actionable field needs guidance: `FieldLabelWithHint`, `InfoHint`, `HoverHint`, or concise
+  inline helper copy
+- Store reusable hint + recommendation pairs in `src/lib/brand-help.ts` (or domain help modules)
+- Recommendations sit in muted `text-xs` below the label — one sentence, actionable
+
+## Live preview for visible changes
+
+- Settings that change the public or member site must show what visitors will see
+- Use **`SettingsEditorShell` `stickyPreview`** + **`SettingsLivePreviewPanel`** + **`SettingsLivePreviewFrame`**
+  (see `.cursor/rules/settings-live-preview.mdc`) — real homepage iframe, not mock chip strips
+- Typography, colors, images, and copy controls include an inline or adjacent preview snippet
+  (e.g. font size fields render sample text at that size; color fields show swatch + usage)
+
+## Guidance without clutter
+
+- One short hint + one optional recommendation per field — not walls of text
+- Image fields: dimensions, aspect ratio, and where the image appears on the site
+- Font sizes: show pixel equivalent and a live sample; support px, rem, and em
+- Prefer sensible defaults and "Recommended" callouts over blank slates
+
+## Reuse existing primitives
+
+- `src/components/ui/info-hint.tsx` — `InfoHint`, `FieldLabelWithHint`, `SettingSectionTitle`
+- `src/lib/brand-help.ts` — brand/settings copy patterns
+- `ThemeColorField` — reference for preview + hint + recommendation layout

@@ -1,0 +1,104 @@
+---
+description: Tailwind CSS v4 canonical class syntax — theme vars, gradients, aspect ratios, spacing scale
+globs: "**/*.{tsx,ts,css}"
+alwaysApply: false
+---
+
+# Tailwind v4 — canonical class syntax
+
+This project uses **Tailwind CSS v4** with gym theme tokens in `src/app/globals.css`. Prefer **built-in utilities**
+and v4 naming over arbitrary `[…]` values and deprecated v3 names.
+
+Tailwind CSS IntelliSense flags non-canonical classes as **warnings** (`suggestCanonicalClasses`). CI and
+`npm run test` enforce the same rules repo-wide via `src/lib/lint/tailwind-class-syntax.ts`.
+
+## Theme CSS variables
+
+Use the **parenthesis shorthand** — not arbitrary `[var(...)]` values.
+
+| Avoid (non-canonical)                           | Use instead                             |
+| ----------------------------------------------- | --------------------------------------- |
+| `text-[var(--gym-muted)]`                       | `text-(--gym-muted)`                    |
+| `border-[var(--gym-border)]/40`                 | `border-(--gym-border)/40`              |
+| `focus:ring-[var(--gym-primary)]/30`            | `focus:ring-(--gym-primary)/30`         |
+| `has-[:checked]:border-[var(--gym-primary)]/50` | `has-checked:border-(--gym-primary)/50` |
+
+Applies to all utilities: `bg-`, `text-`, `border-`, `ring-`, `accent-`, `shadow-`, etc.
+
+## Linear gradients (v4 rename)
+
+| Avoid                    | Use instead       |
+| ------------------------ | ----------------- |
+| `bg-gradient-to-br`      | `bg-linear-to-br` |
+| `bg-gradient-to-r`       | `bg-linear-to-r`  |
+| `bg-gradient-to-b`       | `bg-linear-to-b`  |
+| (any `bg-gradient-to-*`) | `bg-linear-to-*`  |
+
+## Aspect ratios
+
+When the ratio uses **whole numbers**, use the built-in fraction utility — not bracket syntax.
+
+| Avoid              | Use instead      |
+| ------------------ | ---------------- |
+| `aspect-[4/3]`     | `aspect-4/3`     |
+| `aspect-[16/9]`    | `aspect-video`   |
+| `aspect-16/9`      | `aspect-video`   |
+| `aspect-[430/932]` | `aspect-430/932` |
+
+Keep arbitrary brackets for decimal ratios (e.g. `aspect-[1.91/1]`).
+
+## Z-index and flex
+
+| Avoid        | Use instead |
+| ------------ | ----------- |
+| `z-[100]`    | `z-100`     |
+| `flex-[1]`   | `flex-1`    |
+| `flex-[1.1]` | `flex-1.1`  |
+
+Remove duplicate focus outline utilities — use `focus-visible:outline-2` only, not both `outline` and `outline-2`.
+
+## Spacing scale (rem / px)
+
+When a size maps to Tailwind’s spacing scale, use the scale token — not `[Nrem]` or `[Npx]`.
+
+Scale: `1` = `0.25rem` = `4px`. Examples:
+
+| Avoid           | Use instead |
+| --------------- | ----------- |
+| `min-w-[3rem]`  | `min-w-12`  |
+| `min-w-[200px]` | `min-w-50`  |
+| `min-w-[480px]` | `min-w-120` |
+| `max-h-[320px]` | `max-h-80`  |
+
+Applies to size utilities and corner radius: `rounded-[1.75rem]` → `rounded-7`, `rounded-b-[2rem]` → `rounded-b-8`.
+
+## Viewport units
+
+| Avoid          | Use instead  |
+| -------------- | ------------ |
+| `h-[80vh]`     | `h-80vh`     |
+| `max-h-[90vh]` | `max-h-90vh` |
+
+## Border width
+
+| Avoid          | Use instead |
+| -------------- | ----------- |
+| `border-[3px]` | `border-3`  |
+
+Keep arbitrary values for `min(…)` expressions and sizes that do not land on the scale (e.g. `rounded-[1.35rem]`,
+`max-w-[430px]`).
+
+## When editing components
+
+- New class names: follow the tables above before reaching for `[…]`
+- Shared UI primitives (`button.tsx`, `input.tsx`, `card.tsx`) set the pattern — match them
+- After edits: Problems panel on touched files should be clear (reload window if IntelliSense cache is stale)
+- Before finishing: `npm run test` (repo-wide Tailwind scan) and `npm run lint`
+
+## IDE setup
+
+`.vscode/settings.json`:
+
+- `tailwindCSS.experimental.configFile` → `src/app/globals.css`
+- `tailwindCSS.lint.suggestCanonicalClasses` → `warning` (do not silence in source)
+- Exclude generated paths only: `.next/`, `node_modules/`

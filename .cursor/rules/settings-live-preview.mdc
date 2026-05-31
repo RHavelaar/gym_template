@@ -1,0 +1,62 @@
+---
+description: Live iframe previews for owner CMS settings — reusable panel + frame pattern
+alwaysApply: true
+---
+
+# Settings live preview (required)
+
+Owner settings that change the public or member site must use the **live iframe preview system** — not
+hand-drawn mockups, chip strips, or static approximations.
+
+Reference implementation: [`brand-settings-form.tsx`](../src/components/admin/settings/brand-settings-form.tsx)
+and [`brand-preview-panel.tsx`](../src/components/admin/settings/brand-preview-panel.tsx).
+
+## Required stack
+
+| Layer    | Component                  | Role                                        |
+| -------- | -------------------------- | ------------------------------------------- |
+| Layout   | `SettingsEditorShell`      | Sticky preview column + editor blocks       |
+| Chrome   | `SettingsLivePreviewPanel` | Device toggle, toolbar, fullscreen, mobile  |
+| Content  | `SettingsLivePreviewFrame` | Iframe + debounced `postMessage` to preview |
+| Renderer | `LiveSitePreview`          | Real header, homepage sections, footer      |
+
+## When to use
+
+- Brand, site menu, homepage sections, media — anything owners can see on the live site
+- Section-scoped previews (hero, gallery) may use `SettingsEditorShell` `sections` paired rows when the
+  change is limited to one block — still prefer real components over fake markup
+
+## Do not use for site-wide previews
+
+- `DualDeviceSectionPreview` with custom inline mock UI (deprecated for header/menu/homepage previews)
+- Bare `previews={[…]}` legacy column unless the preview is a tiny inline snippet (font size sample, color swatch)
+
+## Adding a new settings preview
+
+1. Load homepage sections via `loadCmsEditorData()` on the server page when the preview shows the homepage
+2. Build a thin `*PreviewPanel` (e.g. `SiteMenuPreviewPanel`) that composes `SettingsLivePreviewPanel` +
+   `SettingsLivePreviewFrame`
+3. Pass draft overrides through `BrandPreviewPayload`:
+   - Brand fields → `draft` (`BrandPreviewDraft`)
+   - Nav, features, auth simulation → `site` (`SitePreviewOverrides`)
+4. Wire `SettingsEditorShell` `stickyPreview={{ preview, editorBlocks }}`
+5. Debounce is handled inside `SettingsLivePreviewFrame` — do not duplicate
+
+## Site overrides (`SitePreviewOverrides`)
+
+Use `payload.site` for non-brand draft fields:
+
+- `nav` — menu link visibility and labels
+- `features` — module toggles that affect routes or header
+- `simulateAuthenticated` — show member menu links in the header preview
+
+Merge helpers live in [`brand-settings.ts`](../src/lib/brand-settings.ts) (`applySitePreviewOverrides`).
+
+## Copy and UX
+
+- One sentence helper text under the preview title explaining what is live vs saved
+- Device toggle (desktop / mobile) on every live preview panel
+- Fullscreen expand button for homepage-style previews
+- Optional audience or view toolbar (visitor vs signed-in, homepage vs sign-in) when it helps owners
+
+See also: [`owner-friendly-ui.mdc`](owner-friendly-ui.mdc), [`responsive-design.mdc`](responsive-design.mdc).
