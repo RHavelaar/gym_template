@@ -52,7 +52,7 @@ export const saveContactPageSettingsAction = async (input: unknown): Promise<Sav
     if (!hasSupabase) {
       updateDemoContactPage(data);
       revalidateMarketingPages();
-      return { ok: true, message: "Contact page saved." };
+      return { ok: true };
     }
 
     const pageId = await ensureGymPage(gymId, "contact", "Contact");
@@ -72,7 +72,7 @@ export const saveContactPageSettingsAction = async (input: unknown): Promise<Sav
     });
 
     revalidateMarketingPages();
-    return { ok: true, message: "Contact page saved." };
+    return { ok: true };
   } catch {
     return saveFail("Could not save contact page settings.");
   }
@@ -93,7 +93,7 @@ export const savePricingPageSettingsAction = async (input: unknown): Promise<Sav
     if (!hasSupabase) {
       updateDemoPricingPage(data);
       revalidateMarketingPages();
-      return { ok: true, message: "Pricing page saved." };
+      return { ok: true };
     }
 
     const pageId = await ensureGymPage(gymId, "pricing", "Pricing");
@@ -113,7 +113,7 @@ export const savePricingPageSettingsAction = async (input: unknown): Promise<Sav
     });
 
     revalidateMarketingPages();
-    return { ok: true, message: "Pricing page saved." };
+    return { ok: true };
   } catch {
     return saveFail("Could not save pricing page settings.");
   }
@@ -134,17 +134,17 @@ export const savePricingPlansAction = async (input: unknown): Promise<SaveAction
     if (!hasSupabase) {
       updateDemoPricingPlans(plans);
       revalidateMarketingPages();
-      return { ok: true, message: "Pricing plans saved." };
+      return { ok: true };
     }
 
     await ensureGymPage(gymId, "pricing", "Pricing");
     const supabase = createServiceClient();
 
-    const { data: existing } = await supabase.from("gym_pricing_plans").select("id").eq("gym_id", gymId);
-    const existingIds = new Set((existing ?? []).map((row) => row.id));
+    const { data: existingRows } = await supabase.from("gym_pricing_plans").select("id").eq("gym_id", gymId);
+    const existingIds = ((existingRows ?? []) as { id: string }[]).map((row) => row.id);
     const incomingIds = new Set(plans.map((plan) => plan.id));
 
-    const toDelete = [...existingIds].filter((id) => !incomingIds.has(id));
+    const toDelete = existingIds.filter((id) => !incomingIds.has(id));
     if (toDelete.length) {
       const { error: deleteError } = await supabase.from("gym_pricing_plans").delete().in("id", toDelete);
       if (deleteError) return saveFail(deleteError.message);
@@ -166,12 +166,12 @@ export const savePricingPlansAction = async (input: unknown): Promise<SaveAction
       resourceType: "gym_pricing_plans",
       summary: `Saved ${plans.length} pricing plan${plans.length === 1 ? "" : "s"}`,
       metadata: {
-        changes: buildChangeSet({ count: existingIds.size }, { count: plans.length }, ["count"]),
+        changes: buildChangeSet({ count: existingIds.length }, { count: plans.length }, ["count"]),
       },
     });
 
     revalidateMarketingPages();
-    return { ok: true, message: "Pricing plans saved." };
+    return { ok: true };
   } catch {
     return saveFail("Could not save pricing plans.");
   }
@@ -188,7 +188,7 @@ export const archiveContactInquiryAction = async (inquiryId: string): Promise<Ac
       const row = rows.find((item) => item.id === inquiryId);
       if (row) row.status = "archived";
       revalidatePath("/admin/inbox");
-      return { ok: true };
+      return;
     }
 
     const supabase = createServiceClient();
@@ -200,5 +200,4 @@ export const archiveContactInquiryAction = async (inquiryId: string): Promise<Ac
 
     if (error) throw new Error(error.message);
     revalidatePath("/admin/inbox");
-    return { ok: true };
   });
