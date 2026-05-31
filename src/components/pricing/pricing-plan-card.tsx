@@ -80,7 +80,7 @@ export const PricingPlanCard = ({ plan }: PricingPlanCardProps) => {
             </a>
           ) : (
             <Link href={plan.ctaHref} className="block">
-              <Button size="lg" variant={plan.isFeatured ? "default" : "secondary"} className="min-h-12 w-full">
+              <Button size="lg" variant={plan.isFeatured ? "primary" : "secondary"} className="min-h-12 w-full">
                 {plan.ctaLabel}
               </Button>
             </Link>
