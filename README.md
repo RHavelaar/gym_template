@@ -184,6 +184,23 @@ supabase db push
 psql $DATABASE_URL -f supabase/seed.sql
 ```
 
+### Contact form email (Resend)
+
+The public **Contact** page saves messages to `contact_inquiries` and notifies the gym by email.
+[Resend](https://resend.com) fits multi-tenant SaaS well: one API key, per-gym `reply-to`, affordable
+volume, and a simple Node SDK on Vercel.
+
+Add to `.env.local` (server-only):
+
+```bash
+RESEND_API_KEY=re_...
+# After verifying your domain in Resend:
+RESEND_FROM_EMAIL="Iron Asylum <notifications@yourdomain.com>"
+```
+
+Without `RESEND_API_KEY`, submissions still save to the **Contact inbox** at `/admin/inbox` — email is
+skipped. Notification goes to **Business settings → General email**, with help email as fallback.
+
 ### Vercel
 
 ```bash

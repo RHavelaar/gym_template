@@ -31,6 +31,8 @@ export const DEFAULT_MESSAGES: Record<ErrorCode, string> = {
   [ERROR_CODES.MEDIA_TOO_LARGE]: "That file is too large to upload.",
   [ERROR_CODES.MEDIA_RENAME_FAILED]: "We could not rename that file.",
 
+  [ERROR_CODES.CONTACT_SUBMIT_FAILED]: "We could not send your message.",
+
   [ERROR_CODES.SYS_UNEXPECTED]: "Something unexpected happened on our end.",
   [ERROR_CODES.SYS_BOUNDARY]: "This page hit a snag. We logged it.",
 };

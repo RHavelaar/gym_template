@@ -23,12 +23,12 @@ Read `node_modules/next/dist/docs/` before assuming older Next.js APIs.
 
 ## Before finishing any task
 
-1. `npm run test` — Vitest must pass; add/update tests for touched logic
-   (see `.cursor/rules/testing-standards.mdc`); includes repo-wide Tailwind class syntax checks
-   (see `.cursor/rules/tailwind-v4-classes.mdc`; fast path: `npm run lint:tailwind`)
-2. `npm run lint` — ESLint must pass
-3. `npm run lint:md` — if any `*.{md,mdc}` changed
-4. `npm run build` — for non-trivial TS/route changes (runs tests via `prebuild`)
+Follow `.cursor/rules/end-of-turn-quality-gate.mdc` as the **last** step every turn: full verify (zero
+warnings), then commit and push when there are changes.
+
+Minimum checks while working: `npm run test`, `npm run lint`, `npm run typecheck`, `npm run format:check`,
+`npm run lint:md` when markdown changed, `npm run build` for non-trivial TS/route changes (tests via
+`prebuild`). See `testing-standards.mdc` and `tailwind-v4-classes.mdc`.
 
 Fix real issues in source; do not suppress linters to hide problems in `src/`. Excluding `.next/` and
 `node_modules/` is standard — those paths are generated, not edited.

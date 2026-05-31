@@ -24,6 +24,10 @@ const envSchema = z.object({
   BRAND_REVIEW_MODEL: z.string().optional(),
   BRAND_REVIEW_MODEL_DEVELOPMENT: z.string().optional(),
   BRAND_REVIEW_MODEL_PRODUCTION: z.string().optional(),
+  /** Resend — transactional email (contact form). Server-only. */
+  RESEND_API_KEY: z.string().optional(),
+  /** e.g. "Iron Asylum <notifications@yourdomain.com>" — verify domain in Resend first. */
+  RESEND_FROM_EMAIL: z.string().optional(),
 });
 
 export const env = envSchema.parse({
@@ -42,6 +46,8 @@ export const env = envSchema.parse({
   BRAND_REVIEW_MODEL: process.env.BRAND_REVIEW_MODEL,
   BRAND_REVIEW_MODEL_DEVELOPMENT: process.env.BRAND_REVIEW_MODEL_DEVELOPMENT,
   BRAND_REVIEW_MODEL_PRODUCTION: process.env.BRAND_REVIEW_MODEL_PRODUCTION,
+  RESEND_API_KEY: process.env.RESEND_API_KEY,
+  RESEND_FROM_EMAIL: process.env.RESEND_FROM_EMAIL,
 });
 
 /** Supabase Data API key for browser and server clients (publishable preferred). */

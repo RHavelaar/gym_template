@@ -1,0 +1,86 @@
+---
+description: Final step every turn — zero warnings, full verify, commit and push when there are changes
+alwaysApply: true
+---
+
+# End-of-turn quality gate (last step)
+
+When you have finished the user’s request and are about to **end your turn** (wait for their reply), run this
+gate **last** — after tests, fixes, and summaries. Do not skip it because a todo list is done.
+
+This gate **overrides** the default “only commit when asked” rule for this repo: auto-commit and push here
+are required when there are committable changes, unless the user said not to in this conversation.
+
+## 1. Fix until clean (zero tolerance)
+
+Resolve every failure before commit. Do not suppress linters, ignore lines, or leave “known” warnings.
+
+| Check                         | Command                | Pass criteria                                |
+| ----------------------------- | ---------------------- | -------------------------------------------- |
+| Tests + Tailwind class syntax | `npm run test`         | exit 0                                       |
+| ESLint                        | `npm run lint`         | exit 0, **no warnings** (`--max-warnings 0`) |
+| TypeScript                    | `npm run typecheck`    | exit 0, no diagnostics                       |
+| Formatting                    | `npm run format:check` | exit 0                                       |
+| Markdown                      | `npm run lint:md`      | exit 0 if any `*.{md,mdc}` changed this turn |
+| Production build              | `npm run build`        | exit 0 (re-runs tests via `prebuild`)        |
+
+If the turn only touched docs, still run `npm run build` when routes/types/imports could be affected; otherwise
+at minimum run test + lint + typecheck + format:check + lint:md.
+
+**Editor parity:** Tailwind canonical-class and CSS issues caught in the IDE must be fixed in source (see
+`tailwind-v4-classes.mdc`). Warnings in Problems for `src/` are not acceptable to leave behind.
+
+## 2. Git commit (when there are changes)
+
+```bash
+git status
+git diff
+git diff --staged
+```
+
+- **Nothing to commit** (clean tree) → skip to push check (step 3).
+- **Never** stage `.env`, credentials, or secrets.
+- **Never** `--no-verify`, `push --force`, or amend unless the user’s commit-amend rule allows it.
+- **Never** change `git config`.
+
+Stage relevant files, then commit with a HEREDOC message (1–2 sentences, why not what):
+
+```bash
+git add -A  # or only paths you changed — never secrets
+git commit -m "$(cat <<'EOF'
+Short summary of why.
+
+EOF
+)"
+```
+
+If the **pre-commit hook fails**, fix the issues and create a **new** commit (do not amend unless amend rules
+apply).
+
+## 3. Push
+
+```bash
+git push
+# if no upstream: git push -u origin HEAD
+```
+
+If push fails (auth, rejected, non-fast-forward), fix or report clearly — do not force-push `main`/`master`.
+
+## 4. Tell the user
+
+In your final message, briefly state: gate passed (or what failed), whether you committed/pushed, and branch
+status. If the gate could not run (no shell, blocked network), say so explicitly.
+
+## Read-only turns
+
+If you **only** answered questions and did not modify the repo, run `npm run test`, `npm run lint`, and
+`npm run typecheck` as a smoke check; skip commit/push unless the tree is dirty from a prior session (then
+commit/push after fixing).
+
+## Order (do not reorder)
+
+1. Fix code and add/update tests per `testing-standards.mdc`
+2. Run the verification table until all pass
+3. Commit if needed
+4. Push
+5. Then send your reply to the user

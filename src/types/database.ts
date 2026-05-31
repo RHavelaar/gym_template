@@ -8,6 +8,24 @@ export type PostType = "pr" | "progress" | "win" | "general";
 export type ReactionType = "pump_up" | "respect" | "beast_mode";
 export type GenderDivision = "open" | "male" | "female" | "non_binary";
 export type ScoringMethod = "best_single" | "wilks" | "total" | "points";
+export type ContactInquiryTopic = "membership" | "training" | "billing" | "feedback" | "other";
+export type ContactInquiryStatus = "new" | "read" | "archived";
+
+export type ContactInquiry = {
+  id: string;
+  gym_id: string;
+  profile_id: string | null;
+  name: string;
+  email: string;
+  phone: string | null;
+  topic: ContactInquiryTopic;
+  message: string;
+  status: ContactInquiryStatus;
+  read_at: string | null;
+  email_sent_at: string | null;
+  email_error: string | null;
+  created_at: string;
+};
 
 export type Profile = {
   id: string;
@@ -275,6 +293,8 @@ export const ADMIN_AUDIT_ACTIONS = {
   EQUIPMENT_ADD: "equipment.add",
   COMPETITION_CREATE: "competition.create",
   PR_MODERATE: "pr.moderate",
+  CONTACT_INQUIRY_RECEIVED: "contact.inquiry.received",
+  CONTACT_INQUIRY_READ: "contact.inquiry.read",
   SYSTEM_PROFILE_UPSERT: "system.profile.upsert",
   SYSTEM_PROFILE_DELETE: "system.profile.delete",
 } as const;

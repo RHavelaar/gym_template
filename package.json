@@ -7,7 +7,8 @@
     "build": "next build",
     "prebuild": "npm run test",
     "start": "next start",
-    "lint": "eslint",
+    "lint": "eslint --max-warnings 0",
+    "typecheck": "tsc --noEmit",
     "lint:tailwind": "vitest run src/lib/lint/tailwind-class-syntax.test.ts",
     "lint:md": "markdownlint-cli2",
     "format": "prettier --write .",
@@ -35,6 +36,7 @@
     "react": "19.2.4",
     "react-colorful": "^5.7.0",
     "react-dom": "19.2.4",
+    "resend": "^6.12.4",
     "sonner": "^2.0.7",
     "tailwind-merge": "^3.6.0",
     "zod": "^4.4.3"
