@@ -1,6 +1,6 @@
 # Postman collection
 
-HTTP Route Handler requests for the gym platform. Server Actions are **not** included — see
+HTTP Route Handler requests for **Memberfloor**. Server Actions are **not** included — see
 [`docs/api/server-actions.md`](../docs/api/server-actions.md).
 
 | File                                                         | Purpose                          |

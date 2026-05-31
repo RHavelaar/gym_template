@@ -88,8 +88,8 @@ export const ironAsylumConfig: GymConfig = {
       order: 5,
       props: {
         title: "Membership",
-        ctaLabel: "Get started",
-        ctaHref: "/sign-up",
+        ctaLabel: "View pricing",
+        ctaHref: "/pricing",
       },
     },
     {

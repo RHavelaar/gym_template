@@ -1,9 +1,9 @@
 openapi: 3.1.0
 info:
-  title: Gym Platform API
+  title: Memberfloor API
   version: 0.1.0
   description: |
-    HTTP Route Handlers for the gym engagement platform.
+    HTTP Route Handlers for Memberfloor.
 
     Server Actions in `src/app/actions/` are internal UI mutations — not listed here.
     See `docs/api/server-actions.md`.
@@ -11,7 +11,7 @@ info:
     Multi-tenancy: one gym per deployment via `NEXT_PUBLIC_GYM_SLUG`.
     See `docs/api/multi-tenancy.md`.
   contact:
-    name: Gym Platform
+    name: Memberfloor
 servers:
   - url: http://localhost:3000
     description: Local development

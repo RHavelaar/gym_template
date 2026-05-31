@@ -321,6 +321,69 @@ export type GymBusinessInfo = {
   };
 };
 
+export type ContactPageFaqItem = {
+  question: string;
+  answer: string;
+};
+
+export type ContactPageSettings = {
+  headline: string;
+  subtitle: string;
+  formHeadline: string;
+  formSubtitle: string;
+  showForm: boolean;
+  showDirectionsLink: boolean;
+  faqItems: ContactPageFaqItem[];
+  metaDescription: string;
+};
+
+export const DEFAULT_CONTACT_PAGE_SETTINGS: ContactPageSettings = {
+  headline: "Contact us",
+  subtitle: "Questions about membership, coaching, or your first visit? Send a message or use the details below.",
+  formHeadline: "Send a message",
+  formSubtitle: "We reply by email. Your message is also saved in the gym inbox for staff.",
+  showForm: true,
+  showDirectionsLink: true,
+  faqItems: [],
+  metaDescription: "",
+};
+
+export type PricingPageSettings = {
+  headline: string;
+  subtitle: string;
+  footnote: string;
+  metaDescription: string;
+};
+
+export const DEFAULT_PRICING_PAGE_SETTINGS: PricingPageSettings = {
+  headline: "Membership & pricing",
+  subtitle: "Straightforward options for day visitors, monthly members, and committed lifters.",
+  footnote: "",
+  metaDescription: "",
+};
+
+export type PricingBillingInterval = "day" | "week" | "month" | "year" | "one_time" | "custom";
+
+export type GymPricingPlan = {
+  id: string;
+  sortOrder: number;
+  enabled: boolean;
+  name: string;
+  tagline: string;
+  description: string;
+  priceDisplay: string;
+  priceCents: number | null;
+  compareAtDisplay: string;
+  billingInterval: PricingBillingInterval;
+  durationLabel: string;
+  features: string[];
+  imageUrl: string;
+  badge: string;
+  isFeatured: boolean;
+  ctaLabel: string;
+  ctaHref: string;
+};
+
 export type GymConfig = {
   slug: string;
   name: string;
@@ -358,8 +421,8 @@ export const DEFAULT_SECTION_PROPS: SectionPropsByType = {
   location: { title: "Location" },
   membership: {
     title: "Membership",
-    ctaLabel: "Get started",
-    ctaHref: "/sign-up",
+    ctaLabel: "View pricing",
+    ctaHref: "/pricing",
   },
   gallery: {
     title: "Gallery",

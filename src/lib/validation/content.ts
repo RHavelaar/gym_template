@@ -132,6 +132,53 @@ export const businessSchema = z.object({
   }),
 });
 
+export const contactPageFaqSchema = z.object({
+  question: z.string().trim().min(1).max(200),
+  answer: z.string().trim().min(1).max(1000),
+});
+
+export const contactPageSettingsSchema = z.object({
+  headline: z.string().trim().min(1).max(120),
+  subtitle: z.string().trim().max(500),
+  formHeadline: z.string().trim().min(1).max(80),
+  formSubtitle: z.string().trim().max(300),
+  showForm: z.boolean(),
+  showDirectionsLink: z.boolean(),
+  faqItems: z.array(contactPageFaqSchema).max(8),
+  metaDescription: z.string().max(320),
+});
+
+export const pricingPageSettingsSchema = z.object({
+  headline: z.string().trim().min(1).max(120),
+  subtitle: z.string().trim().max(500),
+  footnote: z.string().max(1000),
+  metaDescription: z.string().max(320),
+});
+
+export const pricingBillingIntervalSchema = z.enum(["day", "week", "month", "year", "one_time", "custom"]);
+
+export const pricingPlanSchema = z.object({
+  id: z.string().min(1),
+  sortOrder: z.number().int().min(0).max(99),
+  enabled: z.boolean(),
+  name: z.string().trim().min(1).max(80),
+  tagline: z.string().trim().max(120),
+  description: z.string().trim().max(800),
+  priceDisplay: z.string().trim().min(1).max(40),
+  priceCents: z.number().int().min(0).nullable(),
+  compareAtDisplay: z.string().trim().max(40),
+  billingInterval: pricingBillingIntervalSchema,
+  durationLabel: z.string().trim().max(80),
+  features: z.array(z.string().trim().min(1).max(120)).max(12),
+  imageUrl: z.string(),
+  badge: z.string().trim().max(40),
+  isFeatured: z.boolean(),
+  ctaLabel: z.string().trim().min(1).max(40),
+  ctaHref: z.string().trim().min(1).max(500),
+});
+
+export const pricingPlansSchema = z.array(pricingPlanSchema).max(12);
+
 export const galleryCarouselSettingsSchema = z.object({
   enabled: z.boolean(),
   slidesVisible: z.union([z.literal(1), z.literal(3), z.literal(5)]).default(1),

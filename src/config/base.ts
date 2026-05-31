@@ -47,6 +47,7 @@ export const baseGymConfig: Omit<
       { label: "Leaderboards", href: "/leaderboards" },
       { label: "Competitions", href: "/competitions" },
       { label: "Contact", href: "/contact" },
+      { label: "Pricing", href: "/pricing" },
     ],
     member: [{ label: "My Dashboard", href: "/dashboard", requiresAuth: true }],
     account: [

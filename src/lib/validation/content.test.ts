@@ -1,7 +1,14 @@
 import { describe, expect, it } from "vitest";
 import { DEFAULT_BRAND_FONT_SCALE } from "@/config/types";
 import { DEFAULT_BUSINESS_VISIBILITY } from "@/lib/business-info";
-import { brandFontScaleSchema, businessSchema, siteMenuSchema } from "@/lib/validation/content";
+import {
+  brandFontScaleSchema,
+  businessSchema,
+  contactPageSettingsSchema,
+  pricingPageSettingsSchema,
+  pricingPlanSchema,
+  siteMenuSchema,
+} from "@/lib/validation/content";
 
 describe("siteMenuSchema", () => {
   const validPages = [
@@ -9,6 +16,7 @@ describe("siteMenuSchema", () => {
     { id: "leaderboards", enabled: true, label: "Leaderboards" },
     { id: "competitions", enabled: false, label: "Competitions" },
     { id: "contact", enabled: true, label: "Contact" },
+    { id: "pricing", enabled: true, label: "Pricing" },
     { id: "dashboard", enabled: true, label: "My Dashboard" },
     { id: "prSubmit", enabled: true, label: "Log PR" },
     { id: "feed", enabled: true, label: "Gym Feed" },
@@ -106,6 +114,59 @@ describe("businessSchema", () => {
       ],
     });
     expect(result.success).toBe(false);
+  });
+});
+
+describe("contactPageSettingsSchema", () => {
+  it("accepts valid contact page settings", () => {
+    const result = contactPageSettingsSchema.safeParse({
+      headline: "Contact us",
+      subtitle: "We reply quickly",
+      formHeadline: "Send a message",
+      formSubtitle: "Email + inbox",
+      showForm: true,
+      showDirectionsLink: true,
+      faqItems: [{ question: "Tours?", answer: "Yes" }],
+      metaDescription: "",
+    });
+    expect(result.success).toBe(true);
+  });
+});
+
+describe("pricingPlanSchema", () => {
+  it("rejects plan without price display", () => {
+    const result = pricingPlanSchema.safeParse({
+      id: "p1",
+      sortOrder: 1,
+      enabled: true,
+      name: "Monthly",
+      tagline: "",
+      description: "",
+      priceDisplay: "",
+      priceCents: null,
+      compareAtDisplay: "",
+      billingInterval: "month",
+      durationLabel: "",
+      features: [],
+      imageUrl: "",
+      badge: "",
+      isFeatured: false,
+      ctaLabel: "Join",
+      ctaHref: "/sign-up",
+    });
+    expect(result.success).toBe(false);
+  });
+});
+
+describe("pricingPageSettingsSchema", () => {
+  it("accepts valid pricing page settings", () => {
+    const result = pricingPageSettingsSchema.safeParse({
+      headline: "Pricing",
+      subtitle: "Simple plans",
+      footnote: "",
+      metaDescription: "",
+    });
+    expect(result.success).toBe(true);
   });
 });
 

@@ -3,12 +3,13 @@ description: Core standards for the headless gym platform — stack, scope, and 
 alwaysApply: true
 ---
 
-# Gym platform — project foundation
+# Memberfloor — project foundation
 
 ## What this is
 
-Multi-tenant, **config-driven** gym engagement platform (Next.js 16, Clerk, Supabase, Vercel). Iron Asylum is
-seed content only — live in `src/config/gyms/`, not in UI components.
+**Memberfloor** — multi-tenant, **config-driven** gym platform (Next.js 16, Clerk, Supabase, Vercel). Website,
+members, staff ops, and engagement for independents and franchises. Product identity lives in
+`src/config/platform.ts`. Iron Asylum is seed tenant content only — live in `src/config/gyms/`, not hardcoded in UI.
 
 ## Stack (do not swap casually)
 

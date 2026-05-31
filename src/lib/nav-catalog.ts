@@ -74,6 +74,14 @@ export const NAV_CATALOG: NavCatalogEntry[] = [
     defaultLabel: "Contact",
   },
   {
+    id: "pricing",
+    audience: "public",
+    placement: "publicHeader",
+    href: "/pricing",
+    canDisable: true,
+    defaultLabel: "Pricing",
+  },
+  {
     id: "dashboard",
     audience: "member",
     placement: "memberHeader",

@@ -1,5 +1,15 @@
 import Link from "next/link";
-import { Building2, ImageIcon, Layout, MapPin, Navigation, Palette, ScrollText } from "lucide-react";
+import {
+  Building2,
+  CreditCard,
+  ImageIcon,
+  Layout,
+  MapPin,
+  MessageSquare,
+  Navigation,
+  Palette,
+  ScrollText,
+} from "lucide-react";
 import { getGymConfig } from "@/config";
 
 export const metadata = { title: "Site Settings" };
@@ -16,6 +26,18 @@ const SETTINGS_LINKS = [
     title: "Business info",
     description: "Hours, address, contact, and membership copy",
     icon: MapPin,
+  },
+  {
+    href: "/admin/settings/contact",
+    title: "Contact page",
+    description: "Headlines, contact form, FAQs, and live preview",
+    icon: MessageSquare,
+  },
+  {
+    href: "/admin/settings/pricing",
+    title: "Pricing & plans",
+    description: "Membership cards with photos, prices, and sign-up links",
+    icon: CreditCard,
   },
   {
     href: "/admin/settings/media",

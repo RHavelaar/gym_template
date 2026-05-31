@@ -1,12 +1,15 @@
 import { cache } from "react";
 import type {
+  ContactPageSettings,
   GallerySectionProps,
   GymBusinessInfo,
   GymConfig,
   GymFeatureFlags,
   GymLabels,
+  GymPricingPlan,
   HomepageSection,
   HomepageSectionType,
+  PricingPageSettings,
   BrandSeo,
   BrandTypography,
   ThemeTokens,
@@ -17,6 +20,16 @@ import { normalizeBusinessInfo } from "@/lib/business-info";
 import { mergeBrandingImages, mergeGallerySectionProps } from "@/lib/gallery-media";
 import { mergeSeo, mergeTypography } from "@/lib/brand-settings";
 import { getDemoContentOverride, setDemoContentOverride } from "@/lib/demo-content-store";
+import {
+  getFileDefaultContactPageSettings,
+  getFileDefaultPricingPageSettings,
+  getFileDefaultPricingPlans,
+  mergeContactPageSettings,
+  mergePricingPageSettings,
+  normalizeContactPageSettings,
+} from "@/lib/marketing-pages";
+import { mapPricingPlanRow, sortPricingPlans } from "@/lib/pricing-plans";
+import type { GymPricingPlanRow } from "@/types/database";
 import { hasSupabase } from "@/lib/env";
 import { getGymIdBySlug } from "@/lib/profiles";
 import { createServiceClient } from "@/lib/supabase/server";
@@ -251,20 +264,116 @@ export const getResolvedHomepageSections = cache(async (slug?: string): Promise<
   return mergeHomepageSections(base.homepageSections, cms?.sections);
 });
 
+const fetchGymPageSettings = async (
+  gymSlug: string,
+  pageSlug: "contact" | "pricing",
+): Promise<Record<string, unknown> | null> => {
+  if (!hasSupabase) return null;
+  const gymId = await getGymIdBySlug(gymSlug);
+  if (!gymId) return null;
+  const supabase = createServiceClient();
+  const { data } = await supabase
+    .from("gym_pages")
+    .select("settings")
+    .eq("gym_id", gymId)
+    .eq("slug", pageSlug)
+    .maybeSingle();
+  if (!data?.settings || typeof data.settings !== "object") return null;
+  return data.settings as Record<string, unknown>;
+};
+
+const fetchGymPricingPlansFromDb = async (gymSlug: string): Promise<GymPricingPlan[] | null> => {
+  if (!hasSupabase) return null;
+  const gymId = await getGymIdBySlug(gymSlug);
+  if (!gymId) return null;
+  const supabase = createServiceClient();
+  const { data } = await supabase
+    .from("gym_pricing_plans")
+    .select("*")
+    .eq("gym_id", gymId)
+    .order("sort_order", { ascending: true });
+  if (!data?.length) return null;
+  return sortPricingPlans((data as GymPricingPlanRow[]).map(mapPricingPlanRow));
+};
+
+export const getResolvedContactPageSettings = cache(async (slug?: string): Promise<ContactPageSettings> => {
+  const key = slug ?? getGymConfig().slug;
+  const base = getFileDefaultContactPageSettings(key);
+  const demoOverride = getDemoContentOverride();
+
+  if (!hasSupabase) {
+    if (demoOverride?.contactPage) {
+      return normalizeContactPageSettings(demoOverride.contactPage);
+    }
+    return base;
+  }
+
+  const dbSettings = await fetchGymPageSettings(key, "contact");
+  if (!dbSettings) {
+    return demoOverride?.contactPage
+      ? normalizeContactPageSettings(mergeContactPageSettings(base, demoOverride.contactPage))
+      : base;
+  }
+
+  return normalizeContactPageSettings(mergeContactPageSettings(base, dbSettings));
+});
+
+export const getResolvedPricingPageSettings = cache(async (slug?: string): Promise<PricingPageSettings> => {
+  const key = slug ?? getGymConfig().slug;
+  const base = getFileDefaultPricingPageSettings(key);
+  const demoOverride = getDemoContentOverride();
+
+  if (!hasSupabase) {
+    if (demoOverride?.pricingPage) {
+      return mergePricingPageSettings(base, demoOverride.pricingPage);
+    }
+    return base;
+  }
+
+  const dbSettings = await fetchGymPageSettings(key, "pricing");
+  if (!dbSettings) {
+    return demoOverride?.pricingPage ? mergePricingPageSettings(base, demoOverride.pricingPage) : base;
+  }
+
+  return mergePricingPageSettings(base, dbSettings);
+});
+
+export const getResolvedPricingPlans = cache(async (slug?: string): Promise<GymPricingPlan[]> => {
+  const key = slug ?? getGymConfig().slug;
+  const base = getFileDefaultPricingPlans(key);
+  const demoOverride = getDemoContentOverride();
+
+  if (!hasSupabase) {
+    return demoOverride?.pricingPlans ?? base;
+  }
+
+  const dbPlans = await fetchGymPricingPlansFromDb(key);
+  if (!dbPlans?.length) {
+    return demoOverride?.pricingPlans ?? base;
+  }
+
+  return dbPlans;
+});
+
 /** Config + sections from a single cached CMS fetch. */
 export const loadCmsEditorData = cache(async (slug?: string) => {
   const config = await getResolvedGymConfig(slug);
   const sections = await getResolvedHomepageSections(slug);
-  return { config, sections };
+  const contactPage = await getResolvedContactPageSettings(slug);
+  const pricingPage = await getResolvedPricingPageSettings(slug);
+  const pricingPlans = await getResolvedPricingPlans(slug);
+  return { config, sections, contactPage, pricingPage, pricingPlans };
 });
 
-export const getHomePageId = cache(async (slug: string): Promise<string | null> => {
-  if (!hasSupabase) return "demo-home-page";
+export const getGymPageId = cache(async (slug: string, pageSlug: string): Promise<string | null> => {
+  if (!hasSupabase) return `demo-${pageSlug}-page`;
   const gymId = await getGymIdBySlug(slug);
   if (!gymId) return null;
   const supabase = createServiceClient();
-  const { data } = await supabase.from("gym_pages").select("id").eq("gym_id", gymId).eq("slug", "home").maybeSingle();
+  const { data } = await supabase.from("gym_pages").select("id").eq("gym_id", gymId).eq("slug", pageSlug).maybeSingle();
   return data?.id ?? null;
 });
+
+export const getHomePageId = cache(async (slug: string): Promise<string | null> => getGymPageId(slug, "home"));
 
 export { setDemoContentOverride };

@@ -27,7 +27,7 @@ export const BUSINESS_SECTION_HELP = {
   membership: {
     title: "Membership blurb",
     hint: "Short pitch on pricing style (contracts, day passes, etc.) for the homepage membership section.",
-    recommendation: "Two or three sentences; save long pricing tables for a future pricing page.",
+    recommendation: "Two or three sentences; link to your pricing page for full plan details.",
   },
   social: {
     title: "Social & web links",

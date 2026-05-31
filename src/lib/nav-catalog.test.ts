@@ -34,6 +34,7 @@ describe("mergeSiteMenuState", () => {
     expect(state.pages.find((p) => p.id === "home")).toMatchObject({ enabled: true });
     expect(state.pages.find((p) => p.id === "leaderboards")?.enabled).toBe(true);
     expect(state.pages.find((p) => p.id === "contact")?.enabled).toBe(true);
+    expect(state.pages.find((p) => p.id === "pricing")?.enabled).toBe(true);
     expect(state.pages.find((p) => p.id === "achievements")?.enabled).toBe(true);
   });
 
@@ -88,6 +89,7 @@ describe("buildNavFromSiteMenu", () => {
       "/",
       "/leaderboards",
       "/contact",
+      "/pricing",
       "https://instagram.com/gym",
     ]);
     expect(nav.member.map((item) => item.href)).toEqual(["/dashboard"]);

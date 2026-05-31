@@ -11,6 +11,31 @@ export type ScoringMethod = "best_single" | "wilks" | "total" | "points";
 export type ContactInquiryTopic = "membership" | "training" | "billing" | "feedback" | "other";
 export type ContactInquiryStatus = "new" | "read" | "archived";
 
+export type PricingBillingInterval = "day" | "week" | "month" | "year" | "one_time" | "custom";
+
+export type GymPricingPlanRow = {
+  id: string;
+  gym_id: string;
+  sort_order: number;
+  enabled: boolean;
+  name: string;
+  tagline: string;
+  description: string;
+  price_display: string;
+  price_cents: number | null;
+  compare_at_display: string;
+  billing_interval: PricingBillingInterval;
+  duration_label: string;
+  features: string[];
+  image_url: string;
+  badge: string;
+  is_featured: boolean;
+  cta_label: string;
+  cta_href: string;
+  created_at: string;
+  updated_at: string;
+};
+
 export type ContactInquiry = {
   id: string;
   gym_id: string;
@@ -285,6 +310,9 @@ export const ADMIN_AUDIT_ACTIONS = {
   CMS_NAV_UPDATE: "cms.nav.update",
   CMS_FEATURES_UPDATE: "cms.features.update",
   CMS_HOMEPAGE_SECTIONS_SAVE: "cms.homepage.sections.save",
+  CMS_CONTACT_PAGE_UPDATE: "cms.contact.page.update",
+  CMS_PRICING_PAGE_UPDATE: "cms.pricing.page.update",
+  CMS_PRICING_PLANS_SAVE: "cms.pricing.plans.save",
   CMS_HERO_UPDATE: "cms.hero.update",
   STORAGE_ASSET_UPLOAD: "storage.asset.upload",
   STORAGE_ASSET_RENAME: "storage.asset.rename",

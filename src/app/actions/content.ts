@@ -41,9 +41,13 @@ import type { GalleryCarouselSettings } from "@/config/types";
 
 const REVALIDATE_PATHS = [
   "/",
+  "/contact",
+  "/pricing",
   "/admin/settings",
   "/admin/settings/brand",
   "/admin/settings/business",
+  "/admin/settings/contact",
+  "/admin/settings/pricing",
   "/admin/settings/media",
   "/admin/settings/homepage",
   "/admin/settings/navigation",

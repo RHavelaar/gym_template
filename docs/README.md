@@ -1,6 +1,6 @@
 # Documentation
 
-Technical guides for the gym engagement platform codebase.
+Technical guides for the **Memberfloor** codebase.
 
 | Document                         | Description                                        |
 | -------------------------------- | -------------------------------------------------- |

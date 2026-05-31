@@ -1,6 +1,6 @@
 # Audit log system
 
-The gym platform records **who did what and when** for meaningful data changes: profile saves,
+The **Memberfloor** platform records **who did what and when** for meaningful data changes: profile saves,
 CMS settings, storage uploads, posts, staff actions, and webhook-driven profile sync. Events are
 **append-only**, **gym-scoped**, and split into two streams so owners can review member activity
 separately from site and staff changes.

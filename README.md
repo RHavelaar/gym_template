@@ -1,8 +1,10 @@
-# Gym Platform Template
+# Memberfloor
 
-Headless, config-driven gym engagement platform built with **Next.js 16**,
-**Clerk**, **Supabase**, and **Vercel**. Iron Asylum (Longview, TX) is the
-default seed brand; rebrand for other gyms via config files.
+Multi-tenant gym platform — website, members, staff, and community in one
+place. Built with **Next.js 16**, **Clerk**, **Supabase**, and **Vercel**.
+
+Iron Asylum (Longview, TX) is the default seed tenant; each gym rebrand via
+`src/config/gyms/` and `NEXT_PUBLIC_GYM_SLUG`.
 
 ## Features (MVP)
 

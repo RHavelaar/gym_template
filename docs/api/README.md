@@ -1,6 +1,6 @@
 # API documentation
 
-Reference for HTTP Route Handlers, internal Server Actions, and multi-tenancy in the gym platform.
+Reference for HTTP Route Handlers, internal Server Actions, and multi-tenancy in **Memberfloor**.
 
 | Document                                      | Description                                          |
 | --------------------------------------------- | ---------------------------------------------------- |

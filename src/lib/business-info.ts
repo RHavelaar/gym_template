@@ -198,6 +198,14 @@ export const getVisibleBusinessLinks = (
     return placement === "footer" ? link.showInFooter : link.showOnContactPage;
   });
 
+export const buildGoogleMapsDirectionsUrl = (business: GymBusinessInfo): string => {
+  const { address } = business;
+  const query = [address.line1, address.line2, address.city, address.state, address.zip]
+    .filter((part) => typeof part === "string" && part.trim())
+    .join(", ");
+  return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(query)}`;
+};
+
 export const formatBusinessAddressLines = (business: GymBusinessInfo): string[] => {
   const { address } = business;
   const lines: string[] = [];

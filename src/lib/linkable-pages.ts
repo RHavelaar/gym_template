@@ -23,6 +23,7 @@ export const getLinkablePages = (config: GymConfig): LinkablePage[] => {
     { label: "Sign up", href: "/sign-up", group: "core" },
     { label: "Sign in", href: "/sign-in", group: "core" },
     { label: "Contact", href: "/contact", group: "core" },
+    { label: "Pricing", href: "/pricing", group: "core" },
   ];
 
   for (const item of config.nav.public) {
